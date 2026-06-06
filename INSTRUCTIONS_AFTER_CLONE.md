@@ -1,6 +1,9 @@
-# Chạy project sau khi clone
+# Chạy tách riêng FE và BE
 
-Repo có sẵn `.env` demo cho cả FE và BE.
+Repo này có thể tách thành 2 project sandbox:
+
+- Backend: dùng folder `BE`
+- Frontend: dùng folder `photo-sharing-v1`
 
 Tài khoản test:
 
@@ -8,55 +11,21 @@ Tài khoản test:
 admin123 / admin123
 ```
 
-## Cách 1: Clone nguyên repo và chạy local
+## 1. Backend project
 
-Terminal 1:
+Paste folder `BE` vào project backend.
 
-```bash
-cd BE
-npm install
-node .\db\dbLoad.js
-npm start
-```
-
-Terminal 2:
-
-```bash
-cd photo-sharing-v1
-npm install
-npm start
-```
-
-Mở:
-
-```text
-http://localhost:3000/login
-```
-
-Backend local:
-
-```text
-http://localhost:8081
-```
-
-## Cách 2: Tách riêng BE và FE trên sandbox
-
-Nếu bạn tạo 2 project sandbox riêng:
-
-- Project backend: paste folder `BE`.
-- Project frontend: paste folder `photo-sharing-v1`.
-
-### Backend sandbox
-
-Trong backend project, giữ file `.env` và sửa các dòng này:
+File `BE/.env` đã có sẵn demo:
 
 ```env
-CORS_ORIGIN=https://URL-FRONTEND-SANDBOX
+DB_URL=mongodb+srv://admin:123456abc@cluster0.hfbrdbj.mongodb.net/photo-sharing?retryWrites=true&w=majority&appName=Cluster0
+SESSION_SECRET=photo-sharing-demo-secret
+CORS_ORIGIN=
 COOKIE_SAMESITE=none
-COOKIE_SECURE=true
+COOKIE_SECURE=auto
 ```
 
-Sau đó chạy:
+Chạy:
 
 ```bash
 npm install
@@ -70,55 +39,97 @@ Copy URL backend sandbox, ví dụ:
 https://abc-8081.csb.app
 ```
 
-### Frontend sandbox
+## 2. Frontend project
 
-Trong frontend project, sửa file `.env`:
+Paste folder `photo-sharing-v1` vào project frontend.
+
+File `photo-sharing-v1/.env` đã để:
 
 ```env
-REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
+REACT_APP_API_BASE_URL=auto
 ```
 
-Sau đó chạy:
+Chạy:
 
 ```bash
 npm install
 npm start
 ```
 
-Lưu ý: sau khi sửa `.env` của React, cần restart frontend server.
+Mở frontend bằng dạng:
 
-## Vì sao tách FE/BE dễ lỗi?
+```text
+https://URL-FRONTEND-SANDBOX/login?api=https://URL-BACKEND-SANDBOX
+```
 
-Vì code cần biết backend nằm ở đâu và backend cần cho phép frontend gọi API.
+Ví dụ:
 
-Các biến quan trọng:
+```text
+https://fe-demo.csb.app/login?api=https://be-demo-8081.csb.app
+```
 
-Backend `BE/.env`:
+Sau lần đầu, frontend sẽ lưu backend URL vào `localStorage`, các lần sau chỉ cần mở:
+
+```text
+https://URL-FRONTEND-SANDBOX/login
+```
+
+## Nếu muốn cấu hình cố định trong frontend
+
+Thay file `photo-sharing-v1/.env`:
 
 ```env
-CORS_ORIGIN=http://localhost:3000
+REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
+```
+
+Sau đó restart frontend server.
+
+## Nếu chạy local trên máy
+
+Backend:
+
+```bash
+cd BE
+npm install
+node ./db/dbLoad.js
+npm start
+```
+
+Frontend:
+
+```bash
+cd photo-sharing-v1
+npm install
+npm start
+```
+
+Mở:
+
+```text
+http://localhost:3000/login
+```
+
+Vì frontend `.env` đang là `auto`, local sẽ tự gọi:
+
+```text
+http://localhost:8081
+```
+
+Nếu local bị quay lại trang login sau khi đăng nhập, đổi tạm `BE/.env` thành:
+
+```env
 COOKIE_SAMESITE=lax
 COOKIE_SECURE=false
 ```
 
-Frontend `photo-sharing-v1/.env`:
+Sau đó restart backend. Khi chạy sandbox/online thì dùng lại:
 
 ```env
-REACT_APP_API_BASE_URL=http://localhost:8081
-```
-
-Khi chạy sandbox tách domain, đổi thành:
-
-```env
-CORS_ORIGIN=https://URL-FRONTEND-SANDBOX
 COOKIE_SAMESITE=none
-COOKIE_SECURE=true
-REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
+COOKIE_SECURE=auto
 ```
 
-## Nếu package bị lỗi
-
-Xóa `node_modules` và cài lại.
+## Nếu package lỗi
 
 PowerShell:
 
@@ -127,39 +138,38 @@ Remove-Item -Recurse -Force node_modules
 npm install
 ```
 
-Muốn xóa sạch lock file:
-
-```powershell
-Remove-Item -Recurse -Force node_modules
-Remove-Item -Force package-lock.json
-npm install
-```
-
 Git Bash/macOS/Linux:
 
 ```bash
-rm -rf node_modules package-lock.json
+rm -rf node_modules
 npm install
 ```
 
-## Nếu port bị chiếm
+## Nếu đổi `.env`
 
-```powershell
-Get-Process node
-Stop-Process -Id <PROCESS_ID> -Force
+Luôn restart server sau khi sửa `.env`.
+
+Frontend:
+
+```bash
+npm start
 ```
 
-Sau đó chạy lại `npm start`.
+Backend:
 
-## Nếu frontend không load được user/photo
+```bash
+npm start
+```
+
+## Nếu frontend không gọi được backend
 
 Kiểm tra nhanh:
 
-1. Backend có chạy chưa?
-2. Frontend `.env` đã trỏ đúng `REACT_APP_API_BASE_URL` chưa?
-3. Backend `.env` đã set đúng `CORS_ORIGIN` chưa?
-4. Nếu chạy sandbox HTTPS, đã set `COOKIE_SAMESITE=none` và `COOKIE_SECURE=true` chưa?
-5. Restart cả FE và BE sau khi sửa `.env`.
+1. Backend sandbox có mở được URL `/` không.
+2. Frontend đã mở với `?api=https://URL-BACKEND-SANDBOX` chưa.
+3. Nếu đã cấu hình sai URL, xóa localStorage key `PHOTO_APP_API_BASE_URL` hoặc mở lại với `?api=URL-MOI`.
+4. Backend `.env` nên để `CORS_ORIGIN=` nếu muốn nhận request từ nhiều frontend demo.
+5. Sandbox cần HTTPS để cookie đăng nhập hoạt động ổn.
 
 ## Nếu ảnh không hiện
 
@@ -169,29 +179,8 @@ Kiểm tra nhanh:
 BE/images
 ```
 
-Ảnh được frontend lấy qua:
+Frontend lấy ảnh theo backend URL:
 
 ```text
-<REACT_APP_API_BASE_URL>/images/<ten-file-anh>
-```
-
-## Lệnh kiểm tra
-
-Frontend:
-
-```bash
-cd photo-sharing-v1
-npm test -- --watchAll=false
-npm run build
-```
-
-Backend:
-
-```bash
-cd BE
-node --check index.js
-node --check routes/AdminRouter.js
-node --check routes/RegisterRouter.js
-node --check routes/UserRouter.js
-node --check routes/PhotoRouter.js
+<BACKEND_URL>/images/<ten-file-anh>
 ```

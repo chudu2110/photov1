@@ -1,4 +1,41 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || "http://localhost:8081";
+function normalizeApiUrl(url) {
+  // Hàm này bỏ dấu / cuối URL để tránh bị double slash khi gọi API.
+  return url.replace(/\/$/, "");
+}
+
+function getApiBaseUrl() {
+  // Khối này lấy backend URL từ query ?api=... và lưu vào localStorage.
+  const searchParams = new URLSearchParams(window.location.search);
+  const apiUrlFromQuery = searchParams.get("api");
+
+  if (apiUrlFromQuery) {
+    localStorage.setItem("PHOTO_APP_API_BASE_URL", apiUrlFromQuery);
+    return normalizeApiUrl(apiUrlFromQuery);
+  }
+
+  // Khối này ưu tiên backend URL đã lưu từ lần mở trước.
+  const savedApiUrl = localStorage.getItem("PHOTO_APP_API_BASE_URL");
+
+  if (savedApiUrl) {
+    return normalizeApiUrl(savedApiUrl);
+  }
+
+  // Khối này đọc backend URL từ file .env của frontend.
+  const envApiUrl = process.env.REACT_APP_API_BASE_URL;
+
+  if (envApiUrl && envApiUrl !== "auto") {
+    return normalizeApiUrl(envApiUrl);
+  }
+
+  // Khối này hỗ trợ chạy local nhanh nếu không cấu hình gì thêm.
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return "http://localhost:8081";
+  }
+
+  throw new Error("Chưa cấu hình backend URL. Hãy mở frontend với ?api=https://URL-BACKEND hoặc sửa REACT_APP_API_BASE_URL trong .env.");
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 async function handleResponse(response) {
   // Khối này đổi response lỗi từ backend thành Error dễ đọc ở frontend.

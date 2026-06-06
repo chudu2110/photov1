@@ -12,6 +12,9 @@ const requireLogin = require("./routes/authMiddleware");
 
 dbConnect();
 
+// Khối này giúp cookie secure hoạt động đúng khi backend chạy sau proxy HTTPS của sandbox.
+app.set("trust proxy", 1);
+
 function getAllowedOrigins() {
   // Hàm này đọc danh sách frontend được phép gọi backend.
   if (!process.env.CORS_ORIGIN) {
@@ -24,7 +27,9 @@ function getAllowedOrigins() {
 function getSessionCookieConfig() {
   // Hàm này cấu hình cookie session cho cả local và sandbox tách domain.
   const sameSite = process.env.COOKIE_SAMESITE || "lax";
-  const secure = process.env.COOKIE_SECURE === "true";
+  const secure = process.env.COOKIE_SECURE === "auto"
+    ? "auto"
+    : process.env.COOKIE_SECURE === "true";
 
   return {
     sameSite,
