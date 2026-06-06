@@ -12,9 +12,45 @@ const requireLogin = require("./routes/authMiddleware");
 
 dbConnect();
 
-// Khối này cho phép frontend ở port 3000 gọi API và gửi cookie session.
+function getAllowedOrigins() {
+  // Hàm này đọc danh sách frontend được phép gọi backend.
+  if (!process.env.CORS_ORIGIN) {
+    return [];
+  }
+
+  return process.env.CORS_ORIGIN.split(",").map((origin) => origin.trim());
+}
+
+function getSessionCookieConfig() {
+  // Hàm này cấu hình cookie session cho cả local và sandbox tách domain.
+  const sameSite = process.env.COOKIE_SAMESITE || "lax";
+  const secure = process.env.COOKIE_SECURE === "true";
+
+  return {
+    sameSite,
+    secure,
+  };
+}
+
+const allowedOrigins = getAllowedOrigins();
+
+// Khối này cho phép frontend local hoặc frontend sandbox gọi API và gửi cookie session.
 app.use(cors({
-  origin: "http://localhost:3000",
+  origin: (origin, callback) => {
+    // Nếu request không có origin, ví dụ curl/Postman, backend vẫn cho qua.
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    // Nếu chưa cấu hình CORS_ORIGIN, backend tự phản hồi theo origin đang gọi.
+    if (allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
+      callback(null, origin);
+      return;
+    }
+
+    callback(new Error("Origin is not allowed by CORS."));
+  },
   credentials: true,
 }));
 
@@ -26,6 +62,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "photo-sharing-secret",
   resave: false,
   saveUninitialized: false,
+  cookie: getSessionCookieConfig(),
 }));
 
 // Khối này mở thư mục ảnh để frontend hiển thị ảnh cũ và ảnh upload.

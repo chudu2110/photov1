@@ -1,24 +1,16 @@
 # Chạy project sau khi clone
 
-Repo này đã có sẵn `BE/.env` demo để test nhanh MongoDB Atlas.
+Repo có sẵn `.env` demo cho cả FE và BE.
 
-Tài khoản web mặc định:
+Tài khoản test:
 
 ```text
-login name: admin123
-password: admin123
+admin123 / admin123
 ```
 
-## 1. Clone
+## Cách 1: Clone nguyên repo và chạy local
 
-```bash
-git clone https://github.com/chudu2110/photov1.git
-cd photov1
-```
-
-## 2. Cài và chạy backend
-
-Mở terminal 1:
+Terminal 1:
 
 ```bash
 cd BE
@@ -27,15 +19,7 @@ node .\db\dbLoad.js
 npm start
 ```
 
-Backend chạy tại:
-
-```text
-http://localhost:8081
-```
-
-## 3. Cài và chạy frontend
-
-Mở terminal 2:
+Terminal 2:
 
 ```bash
 cd photo-sharing-v1
@@ -43,45 +27,107 @@ npm install
 npm start
 ```
 
-Frontend chạy tại:
-
-```text
-http://localhost:3000
-```
-
-Sau đó mở browser:
+Mở:
 
 ```text
 http://localhost:3000/login
 ```
 
-Đăng nhập bằng:
+Backend local:
 
 ```text
-admin123 / admin123
+http://localhost:8081
+```
+
+## Cách 2: Tách riêng BE và FE trên sandbox
+
+Nếu bạn tạo 2 project sandbox riêng:
+
+- Project backend: paste folder `BE`.
+- Project frontend: paste folder `photo-sharing-v1`.
+
+### Backend sandbox
+
+Trong backend project, giữ file `.env` và sửa các dòng này:
+
+```env
+CORS_ORIGIN=https://URL-FRONTEND-SANDBOX
+COOKIE_SAMESITE=none
+COOKIE_SECURE=true
+```
+
+Sau đó chạy:
+
+```bash
+npm install
+node ./db/dbLoad.js
+npm start
+```
+
+Copy URL backend sandbox, ví dụ:
+
+```text
+https://abc-8081.csb.app
+```
+
+### Frontend sandbox
+
+Trong frontend project, sửa file `.env`:
+
+```env
+REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
+```
+
+Sau đó chạy:
+
+```bash
+npm install
+npm start
+```
+
+Lưu ý: sau khi sửa `.env` của React, cần restart frontend server.
+
+## Vì sao tách FE/BE dễ lỗi?
+
+Vì code cần biết backend nằm ở đâu và backend cần cho phép frontend gọi API.
+
+Các biến quan trọng:
+
+Backend `BE/.env`:
+
+```env
+CORS_ORIGIN=http://localhost:3000
+COOKIE_SAMESITE=lax
+COOKIE_SECURE=false
+```
+
+Frontend `photo-sharing-v1/.env`:
+
+```env
+REACT_APP_API_BASE_URL=http://localhost:8081
+```
+
+Khi chạy sandbox tách domain, đổi thành:
+
+```env
+CORS_ORIGIN=https://URL-FRONTEND-SANDBOX
+COOKIE_SAMESITE=none
+COOKIE_SECURE=true
+REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
 ```
 
 ## Nếu package bị lỗi
 
 Xóa `node_modules` và cài lại.
 
-Backend:
+PowerShell:
 
 ```powershell
-cd BE
 Remove-Item -Recurse -Force node_modules
 npm install
 ```
 
-Frontend:
-
-```powershell
-cd photo-sharing-v1
-Remove-Item -Recurse -Force node_modules
-npm install
-```
-
-Nếu muốn xóa sạch cả lock file rồi cài lại:
+Muốn xóa sạch lock file:
 
 ```powershell
 Remove-Item -Recurse -Force node_modules
@@ -89,73 +135,47 @@ Remove-Item -Force package-lock.json
 npm install
 ```
 
-## Nếu port bị chiếm
+Git Bash/macOS/Linux:
 
-Kiểm tra Node đang chạy:
+```bash
+rm -rf node_modules package-lock.json
+npm install
+```
+
+## Nếu port bị chiếm
 
 ```powershell
 Get-Process node
-```
-
-Dừng process theo id:
-
-```powershell
 Stop-Process -Id <PROCESS_ID> -Force
 ```
 
 Sau đó chạy lại `npm start`.
 
-## Nếu backend không connect MongoDB
+## Nếu frontend không load được user/photo
 
-Kiểm tra file:
+Kiểm tra nhanh:
 
-```text
-BE/.env
-```
-
-File demo hiện có dạng:
-
-```env
-DB_URL=mongodb+srv://...
-SESSION_SECRET=photo-sharing-demo-secret
-```
-
-Lỗi thường gặp:
-
-```text
-bad auth : authentication failed
-```
-
-Cách xử lý nhanh:
-
-- Kiểm tra username/password trong `BE/.env`.
-- Kiểm tra MongoDB Atlas có allow IP hiện tại không.
-- Nếu đổi database, chạy lại `node .\db\dbLoad.js`.
-
-## Nếu frontend báo không load được user/photo
-
-Làm theo thứ tự:
-
-1. Đảm bảo backend đang chạy ở `http://localhost:8081`.
-2. Đảm bảo frontend đang chạy ở `http://localhost:3000`.
-3. Vào lại `http://localhost:3000/login`.
-4. Login lại bằng `admin123 / admin123`.
+1. Backend có chạy chưa?
+2. Frontend `.env` đã trỏ đúng `REACT_APP_API_BASE_URL` chưa?
+3. Backend `.env` đã set đúng `CORS_ORIGIN` chưa?
+4. Nếu chạy sandbox HTTPS, đã set `COOKIE_SAMESITE=none` và `COOKIE_SECURE=true` chưa?
+5. Restart cả FE và BE sau khi sửa `.env`.
 
 ## Nếu ảnh không hiện
 
-Kiểm tra folder này có ảnh:
+Ảnh phải nằm trong:
 
 ```text
 BE/images
 ```
 
-Ảnh được serve qua backend:
+Ảnh được frontend lấy qua:
 
 ```text
-http://localhost:8081/images/<ten-file-anh>
+<REACT_APP_API_BASE_URL>/images/<ten-file-anh>
 ```
 
-## Lệnh kiểm tra nhanh trước khi nộp
+## Lệnh kiểm tra
 
 Frontend:
 
@@ -170,15 +190,8 @@ Backend:
 ```bash
 cd BE
 node --check index.js
-node --check routes\AdminRouter.js
-node --check routes\RegisterRouter.js
-node --check routes\UserRouter.js
-node --check routes\PhotoRouter.js
+node --check routes/AdminRouter.js
+node --check routes/RegisterRouter.js
+node --check routes/UserRouter.js
+node --check routes/PhotoRouter.js
 ```
-
-## Ghi chú
-
-- `node_modules` không có trên GitHub vì tải lại bằng `npm install`.
-- `build` không có trên GitHub vì tạo lại bằng `npm run build`.
-- Log và cấu hình IDE không cần để chạy project.
-- `BE/.env` được đưa lên vì đây là database demo theo yêu cầu.
