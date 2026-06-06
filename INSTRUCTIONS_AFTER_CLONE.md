@@ -1,9 +1,9 @@
-# Chạy tách riêng FE và BE
+# Chạy project sau khi clone
 
-Repo này có thể tách thành 2 project sandbox:
+Repo gốc này là bản gộp, gồm cả Backend và Frontend.
 
-- Backend: dùng folder `BE`
-- Frontend: dùng folder `photo-sharing-v1`
+- Backend nằm trong folder `BE`
+- Frontend nằm trong folder `photo-sharing-v1`
 
 Tài khoản test:
 
@@ -11,82 +11,9 @@ Tài khoản test:
 admin123 / admin123
 ```
 
-## 1. Backend project
+## 1. Chạy Backend
 
-Paste folder `BE` vào project backend.
-
-File `BE/.env` đã có sẵn demo:
-
-```env
-DB_URL=mongodb+srv://admin:123456abc@cluster0.hfbrdbj.mongodb.net/photo-sharing?retryWrites=true&w=majority&appName=Cluster0
-SESSION_SECRET=photo-sharing-demo-secret
-CORS_ORIGIN=
-COOKIE_SAMESITE=none
-COOKIE_SECURE=auto
-```
-
-Chạy:
-
-```bash
-npm install
-node ./db/dbLoad.js
-npm start
-```
-
-Copy URL backend sandbox, ví dụ:
-
-```text
-https://abc-8081.csb.app
-```
-
-## 2. Frontend project
-
-Paste folder `photo-sharing-v1` vào project frontend.
-
-File `photo-sharing-v1/.env` đã để:
-
-```env
-REACT_APP_API_BASE_URL=auto
-```
-
-Chạy:
-
-```bash
-npm install
-npm start
-```
-
-Mở frontend bằng dạng:
-
-```text
-https://URL-FRONTEND-SANDBOX/login?api=https://URL-BACKEND-SANDBOX
-```
-
-Ví dụ:
-
-```text
-https://fe-demo.csb.app/login?api=https://be-demo-8081.csb.app
-```
-
-Sau lần đầu, frontend sẽ lưu backend URL vào `localStorage`, các lần sau chỉ cần mở:
-
-```text
-https://URL-FRONTEND-SANDBOX/login
-```
-
-## Nếu muốn cấu hình cố định trong frontend
-
-Thay file `photo-sharing-v1/.env`:
-
-```env
-REACT_APP_API_BASE_URL=https://URL-BACKEND-SANDBOX
-```
-
-Sau đó restart frontend server.
-
-## Nếu chạy local trên máy
-
-Backend:
+Mở terminal 1:
 
 ```bash
 cd BE
@@ -95,7 +22,25 @@ node ./db/dbLoad.js
 npm start
 ```
 
-Frontend:
+Backend sẽ chạy ở:
+
+```text
+http://localhost:8081
+```
+
+File `BE/.env` đã có sẵn demo:
+
+```env
+DB_URL=mongodb+srv://admin:123456abc@cluster0.hfbrdbj.mongodb.net/photo-sharing?retryWrites=true&w=majority&appName=Cluster0
+SESSION_SECRET=photo-sharing-demo-secret
+CORS_ORIGIN=
+COOKIE_SAMESITE=lax
+COOKIE_SECURE=false
+```
+
+## 2. Chạy Frontend
+
+Mở terminal 2:
 
 ```bash
 cd photo-sharing-v1
@@ -103,30 +48,22 @@ npm install
 npm start
 ```
 
-Mở:
+Frontend sẽ chạy ở:
 
 ```text
 http://localhost:3000/login
 ```
 
-Vì frontend `.env` đang là `auto`, local sẽ tự gọi:
+File `photo-sharing-v1/.env` đã để:
+
+```env
+REACT_APP_API_BASE_URL=auto
+```
+
+Khi chạy local, `auto` sẽ tự gọi backend:
 
 ```text
 http://localhost:8081
-```
-
-Nếu local bị quay lại trang login sau khi đăng nhập, đổi tạm `BE/.env` thành:
-
-```env
-COOKIE_SAMESITE=lax
-COOKIE_SECURE=false
-```
-
-Sau đó restart backend. Khi chạy sandbox/online thì dùng lại:
-
-```env
-COOKIE_SAMESITE=none
-COOKIE_SECURE=auto
 ```
 
 ## Nếu package lỗi
@@ -147,15 +84,15 @@ npm install
 
 ## Nếu đổi `.env`
 
-Luôn restart server sau khi sửa `.env`.
+Sau khi sửa `.env`, luôn restart server.
 
-Frontend:
+Backend:
 
 ```bash
 npm start
 ```
 
-Backend:
+Frontend:
 
 ```bash
 npm start
@@ -165,22 +102,33 @@ npm start
 
 Kiểm tra nhanh:
 
-1. Backend sandbox có mở được URL `/` không.
-2. Frontend đã mở với `?api=https://URL-BACKEND-SANDBOX` chưa.
-3. Nếu đã cấu hình sai URL, xóa localStorage key `PHOTO_APP_API_BASE_URL` hoặc mở lại với `?api=URL-MOI`.
-4. Backend `.env` nên để `CORS_ORIGIN=` nếu muốn nhận request từ nhiều frontend demo.
-5. Sandbox cần HTTPS để cookie đăng nhập hoạt động ổn.
+1. Backend đã chạy ở `http://localhost:8081` chưa.
+2. Frontend đã chạy ở `http://localhost:3000` chưa.
+3. File `photo-sharing-v1/.env` đang là `REACT_APP_API_BASE_URL=auto` chưa.
+4. Nếu từng mở frontend bằng `?api=...`, hãy xóa localStorage key `PHOTO_APP_API_BASE_URL`.
+5. Restart cả FE và BE sau khi sửa `.env`.
 
 ## Nếu ảnh không hiện
 
-Ảnh phải nằm trong:
+Ảnh nằm trong:
 
 ```text
 BE/images
 ```
 
-Frontend lấy ảnh theo backend URL:
+Frontend lấy ảnh qua backend:
 
 ```text
-<BACKEND_URL>/images/<ten-file-anh>
+http://localhost:8081/images/<ten-file-anh>
 ```
+
+## Nếu muốn chạy tách FE và BE
+
+Repo tách riêng đã được đẩy ở đây:
+
+```text
+https://github.com/chudu2110/photo-FE.git
+https://github.com/chudu2110/photo-BE.git
+```
+
+Hai repo đó đã có instruction riêng cho cách chạy tách.
