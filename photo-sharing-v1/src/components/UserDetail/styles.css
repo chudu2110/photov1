@@ -1,0 +1,14 @@
+.user-detail {
+  max-width: 680px;
+}
+
+.user-detail-info {
+  background: #f8fafc;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.user-detail-button {
+  align-self: flex-start;
+}

@@ -1,0 +1,13 @@
+.main-topbar-buffer {
+  margin-top: 70px;
+}
+
+.main-grid-item {
+  height: calc(100vh - 85px);
+  overflow: auto;
+  padding: 16px;
+}
+
+body {
+  background: #f4f6f8;
+}

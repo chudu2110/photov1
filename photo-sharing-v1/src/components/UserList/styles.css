@@ -1,0 +1,19 @@
+.user-list {
+  min-width: 180px;
+}
+
+.user-list-title {
+  padding: 4px 8px 12px;
+}
+
+.user-list-error {
+  padding: 0 8px 8px;
+}
+
+.user-list-empty {
+  padding: 0 8px;
+}
+
+.user-list-nav a {
+  color: inherit;
+}
