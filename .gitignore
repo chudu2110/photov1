@@ -1,6 +1,7 @@
 node_modules/
 build/
 .env
+!BE/.env
 *.log
 __MACOSX/
 .idea/
